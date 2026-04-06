@@ -1,0 +1,6 @@
+git init
+git add .
+git commit -m "OMS Initial Code"
+git branch -M main
+git remote add origin https://github.com/your-username/AgriEdge-OMS.git
+git push -u origin main
