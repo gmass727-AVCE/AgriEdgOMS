@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>AgriEdge OMS</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; background:#f4f6f9; }
+    header { background:#2e7d32; color:white; padding:15px; text-align:center; }
+    .container { padding:20px; }
+    .card { background:white; padding:15px; margin-bottom:20px; border-radius:10px; box-shadow:0 2px 6px rgba(0,0,0,0.1); }
+    input, select, button { padding:10px; margin:5px; }
+    table { width:100%; border-collapse: collapse; }
+    th, td { border:1px solid #ddd; padding:8px; text-align:left; }
+    th { background:#e8f5e9; }
+    button { background:#2e7d32; color:white; border:none; border-radius:5px; cursor:pointer; }
+    button:hover { background:#1b5e20; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>AgriEdge OMS Dashboard</h1>
+</header>
+
+<div class="container">
+
+  <div class="card">
+    <h2>Create Order</h2>
+    <input type="text" id="customer" placeholder="Customer Name">
+    <input type="text" id="product" placeholder="Product">
+    <input type="number" id="quantity" placeholder="Quantity">
+    <button onclick="createOrder()">Add Order</button>
+  </div>
+
+  <div class="card">
+    <h2>Orders</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Customer</th>
+          <th>Product</th>
+          <th>Quantity</th>
+          <th>Status</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody id="orderTable"></tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>Inventory</h2>
+    <input type="text" id="invProduct" placeholder="Product">
+    <input type="number" id="invStock" placeholder="Stock">
+    <button onclick="addInventory()">Add Inventory</button>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Product</th>
+          <th>Stock</th>
+        </tr>
+      </thead>
+      <tbody id="inventoryTable"></tbody>
+    </table>
+  </div>
+
+</div>
+
+<script>
+  let orders = [];
+  let inventory = [];
+
+  function createOrder() {
+    const customer = document.getElementById('customer').value;
+    const product = document.getElementById('product').value;
+    const quantity = parseInt(document.getElementById('quantity').value);
+
+    if (!customer || !product || !quantity) {
+      alert("Please fill all fields");
+      return;
+    }
+
+    orders.push({
+      id: orders.length + 1,
+      customer,
+      product,
+      quantity,
+      status: "New"
+    });
+
+    updateOrders();
+  }
+
+  function updateOrders() {
+    const table = document.getElementById('orderTable');
+    table.innerHTML = "";
+
+    orders.forEach(order => {
+      const row = `<tr>
+        <td>${order.id}</td>
+        <td>${order.customer}</td>
+        <td>${order.product}</td>
+        <td>${order.quantity}</td>
+        <td>${order.status}</td>
+        <td><button onclick="completeOrder(${order.id})">Complete</button></td>
+      </tr>`;
+      table.innerHTML += row;
+    });
+  }
+
+  function completeOrder(id) {
+    const order = orders.find(o => o.id === id);
+    if (order) {
+      order.status = "Completed";
+      reduceInventory(order.product, order.quantity);
+      updateOrders();
+      updateInventory();
+    }
+  }
+
+  function addInventory() {
+    const product = document.getElementById('invProduct').value;
+    const stock = parseInt(document.getElementById('invStock').value);
+
+    if (!product || !stock) {
+      alert("Enter inventory details");
+      return;
+    }
+
+    const existing = inventory.find(i => i.product === product);
+    if (existing) {
+      existing.stock += stock;
+    } else {
+      inventory.push({ product, stock });
+    }
+
+    updateInventory();
+  }
+
+  function reduceInventory(product, qty) {
+    const item = inventory.find(i => i.product === product);
+    if (item) {
+      item.stock -= qty;
+      if (item.stock < 0) item.stock = 0;
+    }
+  }
+
+  function updateInventory() {
+    const table = document.getElementById('inventoryTable');
+    table.innerHTML = "";
+
+    inventory.forEach(item => {
+      const row = `<tr>
+        <td>${item.product}</td>
+        <td>${item.stock}</td>
+      </tr>`;
+      table.innerHTML += row;
+    });
+  }
+</script>
+
+</body>
+</html>
